@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE Share</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px; }
+        #btnShare { background-color: #00B900; color: white; border: none; padding: 15px 20px; font-size: 18px; border-radius: 50px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; }
+        h2 { color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="status">พร้อมส่งข้อความ</h2>
+        <p id="message">คลิกปุ่มด้านล่างเพื่อส่ง Flex Message</p>
+        <button id="btnShare">คลิกที่นี่เพื่อส่งข้อความ</button>
+    </div>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        async function main() {
+            // 1. เริ่มต้นระบบ LIFF (ใส่ LIFF ID ของคุณที่นี่)
+            await liff.init({ liffId: "YOUR_LIFF_ID_HERE" }); 
+
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            }
+        }
+        main();
+
+        document.getElementById('btnShare').addEventListener('click', async () => {
+            if (liff.isApiAvailable('shareTargetPicker')) {
+                try {
+                    const result = await liff.shareTargetPicker([
+                        {
+                            "type": "flex",
+                            "altText": "คุณได้รับข้อความใหม่",
+                            "contents": {
+                                "type": "carousel",
+                                "contents": [
+                                    /* โค้ด JSON ส่วนที่ 1 และ 2 ที่คุณส่งมาจะมาอยู่ตรงนี้ */
+                                    { "type": "bubble", "body": { "type": "box", "layout": "vertical", "contents": [ { "type": "image", "url": "https://img5.pic.in.th/file/secure-sv1/360x450px-ezgif.com-gif-to-apng-converter9d21deaf871ccb4c.png", "size": "full", "aspectMode": "cover", "aspectRatio": "2.3:3" }, { "type": "button", "action": { "type": "uri", "uri": "https://elibrary-afapslib.cu-elibrary.com/", "label": " " }, "position": "absolute", "offsetTop": "85%" } ], "paddingAll": "none" } },
+                                    { "type": "bubble", "hero": { "type": "image", "url": "https://img2.pic.in.th/2-ezgif.com-gif-to-apng-converter.png", "size": "full", "aspectMode": "cover", "aspectRatio": "2.9:3" }, "body": { "type": "box", "layout": "vertical", "backgroundColor": "#9370DB", "contents": [ { "type": "text", "text": "The Ride Of A Lifetime และ Growing", "weight": "bold", "color": "#4A148C", "wrap": true }, { "type": "text", "text": "แนะนำโดย : นตท.กฤศวรท ง. และ นตท.ภูรินท์ ร.", "size": "sm", "color": "#6A1B9A", "wrap": true } ] } }
+                                ]
+                            }
+                        }
+                    ]);
+                    if (result) { alert("ส่งข้อความสำเร็จ!"); }
+                } catch (error) {
+                    alert("เกิดข้อผิดพลาด: " + error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
