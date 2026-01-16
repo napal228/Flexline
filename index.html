@@ -1,59 +1,217 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LINE Share</title>
+    <title>LINE Share Flex Message</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px; }
-        #btnShare { background-color: #00B900; color: white; border: none; padding: 15px 20px; font-size: 18px; border-radius: 50px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; }
-        h2 { color: #333; }
-        p { color: #666; }
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+        }
+
+        h2 { color: #333; margin: 0 0 10px 0; font-size: 24px; }
+        p { color: #777; margin: 0 0 30px 0; font-size: 16px; line-height: 1.5; }
+
+        #btnShare {
+            background-color: #06C755; /* LINE Official Color */
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #btnShare:hover {
+            background-color: #05a346;
+            transform: translateY(-2px);
+        }
+
+        #btnShare:active {
+            transform: translateY(0);
+        }
+
+        #btnShare:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #06C755;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h2 id="status">พร้อมส่งข้อความ</h2>
-        <p id="message">คลิกปุ่มด้านล่างเพื่อส่ง Flex Message</p>
-        <button id="btnShare">คลิกที่นี่เพื่อส่งข้อความ</button>
+        <h2 id="status">กำลังเตรียมระบบ...</h2>
+        <p id="message">กรุณารอสักครู่ ระบบกำลังเรียกใช้งาน LINE</p>
+        <button id="btnShare" disabled>
+            <div class="loader" id="loader"></div>
+            <span>คลิกที่นี่เพื่อส่งข้อความ</span>
+        </button>
     </div>
 
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
-        async function main() {
-            // 1. เริ่มต้นระบบ LIFF (ใส่ LIFF ID ของคุณที่นี่)
-            await liff.init({ liffId: "YOUR_LIFF_ID_HERE" }); 
+        const liffId = "2008909517-MUf4Tl5N"; // ใส่ LIFF ID ของคุณแล้ว
 
-            if (!liff.isLoggedIn()) {
-                liff.login();
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: liffId });
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                } else {
+                    document.getElementById('status').innerText = "ระบบพร้อมใช้งาน";
+                    document.getElementById('message').innerText = "คุณสามารถส่ง Flex Message ให้เพื่อนได้แล้ว";
+                    document.getElementById('btnShare').disabled = false;
+                }
+            } catch (err) {
+                document.getElementById('status').innerText = "เกิดข้อผิดพลาด";
+                document.getElementById('message').innerText = err.message;
             }
         }
-        main();
 
         document.getElementById('btnShare').addEventListener('click', async () => {
+            const btn = document.getElementById('btnShare');
+            const loader = document.getElementById('loader');
+            
+            btn.disabled = true;
+            loader.style.display = "block";
+
             if (liff.isApiAvailable('shareTargetPicker')) {
                 try {
                     const result = await liff.shareTargetPicker([
                         {
                             "type": "flex",
-                            "altText": "คุณได้รับข้อความใหม่",
+                            "altText": "E-Library แนะนำหนังสือใหม่",
                             "contents": {
                                 "type": "carousel",
                                 "contents": [
-                                    /* โค้ด JSON ส่วนที่ 1 และ 2 ที่คุณส่งมาจะมาอยู่ตรงนี้ */
-                                    { "type": "bubble", "body": { "type": "box", "layout": "vertical", "contents": [ { "type": "image", "url": "https://img5.pic.in.th/file/secure-sv1/360x450px-ezgif.com-gif-to-apng-converter9d21deaf871ccb4c.png", "size": "full", "aspectMode": "cover", "aspectRatio": "2.3:3" }, { "type": "button", "action": { "type": "uri", "uri": "https://elibrary-afapslib.cu-elibrary.com/", "label": " " }, "position": "absolute", "offsetTop": "85%" } ], "paddingAll": "none" } },
-                                    { "type": "bubble", "hero": { "type": "image", "url": "https://img2.pic.in.th/2-ezgif.com-gif-to-apng-converter.png", "size": "full", "aspectMode": "cover", "aspectRatio": "2.9:3" }, "body": { "type": "box", "layout": "vertical", "backgroundColor": "#9370DB", "contents": [ { "type": "text", "text": "The Ride Of A Lifetime และ Growing", "weight": "bold", "color": "#4A148C", "wrap": true }, { "type": "text", "text": "แนะนำโดย : นตท.กฤศวรท ง. และ นตท.ภูรินท์ ร.", "size": "sm", "color": "#6A1B9A", "wrap": true } ] } }
+                                    {
+                                        "type": "bubble",
+                                        "body": {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [
+                                                {
+                                                    "type": "image",
+                                                    "url": "https://img5.pic.in.th/file/secure-sv1/360x450px-ezgif.com-gif-to-apng-converter9d21deaf871ccb4c.png",
+                                                    "size": "full",
+                                                    "animated": true,
+                                                    "aspectMode": "cover",
+                                                    "aspectRatio": "2.3:3"
+                                                },
+                                                {
+                                                    "type": "button",
+                                                    "action": {
+                                                        "type": "uri",
+                                                        "uri": "https://elibrary-afapslib.cu-elibrary.com/",
+                                                        "label": "เปิดอ่านหนังสือ"
+                                                    },
+                                                    "position": "absolute",
+                                                    "offsetTop": "80%",
+                                                    "offsetStart": "10%",
+                                                    "offsetEnd": "10%"
+                                                }
+                                            ],
+                                            "paddingAll": "none"
+                                        }
+                                    },
+                                    {
+                                        "type": "bubble",
+                                        "hero": {
+                                            "type": "image",
+                                            "url": "https://img2.pic.in.th/2-ezgif.com-gif-to-apng-converter.png",
+                                            "size": "full",
+                                            "aspectMode": "cover",
+                                            "aspectRatio": "2.9:3",
+                                            "animated": true,
+                                            "action": {
+                                                "type": "uri",
+                                                "uri": "https://www.canva.com/design/DAG-RtBLz-M/TwboOx-ya67r4t1CsfzSWA/watch?utm_content=DAG-RtBLz-M&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hcd4c241121"
+                                            }
+                                        },
+                                        "body": {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "backgroundColor": "#9370DB",
+                                            "contents": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "The Ride Of A Lifetime และ Growing",
+                                                    "weight": "bold",
+                                                    "size": "md",
+                                                    "color": "#4A148C",
+                                                    "wrap": true
+                                                },
+                                                {
+                                                    "type": "text",
+                                                    "text": "แนะนำโดย : นตท.กฤศวรท ง. และ นตท.ภูรินท์ ร.",
+                                                    "size": "sm",
+                                                    "color": "#ffffff",
+                                                    "wrap": true
+                                                }
+                                            ]
+                                        }
+                                    }
                                 ]
                             }
                         }
                     ]);
-                    if (result) { alert("ส่งข้อความสำเร็จ!"); }
+                    if (result) {
+                        console.log(`[${result.status}] Message sent!`);
+                    } else {
+                        console.log("TargetPicker was closed");
+                    }
                 } catch (error) {
-                    alert("เกิดข้อผิดพลาด: " + error);
+                    alert("ส่งไม่สำเร็จ: " + error);
                 }
+            } else {
+                alert("ฟีเจอร์นี้ไม่รองรับในเบราว์เซอร์นี้");
             }
+            
+            btn.disabled = false;
+            loader.style.display = "none";
         });
+
+        initializeLiff();
     </script>
 </body>
 </html>
